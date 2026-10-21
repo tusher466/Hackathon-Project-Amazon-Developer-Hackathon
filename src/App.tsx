@@ -363,6 +363,7 @@ export default function App() {
               setFocusedElementId(`nav-${tab}`);
             }}
             onSelectMedia={(item) => {
+              tvStorage.recordWatched(item.id);
               if (item.category === 'sports') setCurrentTab('sports');
               else if (item.category === 'fitness') setCurrentTab('fitness');
               else setCurrentTab('movies');
@@ -370,6 +371,8 @@ export default function App() {
             watchlist={watchlist}
             onToggleWatchlist={handleToggleWatchlist}
             focusedElementId={focusedElementId}
+            activeProfile={activeProfile}
+            highContrast={settings.highContrast}
           />
         )}
 

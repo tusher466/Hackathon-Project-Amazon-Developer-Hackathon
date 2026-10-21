@@ -208,6 +208,129 @@ Provide detailed actor information and cinematic scene context. Return valid JSO
   });
 });
 
+// Fallback fitness tips dictionary
+const fallbackDailyMotivationTips = [
+  {
+    title: 'The 60-Second Thoracic Spine Unlock',
+    tip: 'Extended couch sitting compresses the ribcage and reduces oxygen intake. Opening your upper thoracic spine immediately elevates alertness, improves lung capacity, and relieves neck strain.',
+    category: 'Quick Mobility',
+    actionableStep: 'Interlace hands behind your head, inhale deeply, and gently arch backward over your sofa or chair backrest 5 times with slow, rhythmic exhalations.',
+    estimatedTime: '2 min',
+    intensityLevel: 'Low',
+    aiQuote: 'Motion is lotion for the joints; tiny daily movements yield profound physical longevity.',
+  },
+  {
+    title: 'Living Room Air-Squat Metabolic Surge',
+    tip: 'Activating the body’s largest muscle groups—the quadriceps and gluteals—stimulates glucose uptake and clears sluggish afternoon fatigue in under 90 seconds.',
+    category: 'Metabolic Spark',
+    actionableStep: 'Stand up right now and perform 15 slow, controlled air squats with a 2-second hold at the bottom before returning to the screen.',
+    estimatedTime: '3 min',
+    intensityLevel: 'Medium',
+    aiQuote: 'Energy flows where attention goes—ignite your metabolic engine with every conscious stand.',
+  },
+  {
+    title: 'Diaphragmatic Parasympathetic Reset',
+    tip: 'Intense training sessions and fast-paced cinematic media elevate cortisol. Controlled box breathing switches your autonomic nervous system into optimal cellular recovery mode.',
+    category: 'Active Recovery',
+    actionableStep: 'Sit upright, breathe in through your nose for 4 seconds, hold for 4 seconds, exhale smoothly for 4 seconds, and pause empty for 4 seconds. Repeat 4 cycles.',
+    estimatedTime: '3 min',
+    intensityLevel: 'Low',
+    aiQuote: 'Rest is not the absence of progress; it is the foundation upon which endurance is forged.',
+  },
+  {
+    title: 'Commercial Break Isometric Plank Challenge',
+    tip: 'Isometric core stability protects your lumbar spine and enhances balance during both high-energy HIIT workouts and everyday movements.',
+    category: 'Core & Spine',
+    actionableStep: 'Drop to the rug for a steady 45-second forearm plank. Focus on bracing your abs and keeping your pelvis neutral.',
+    estimatedTime: '2 min',
+    intensityLevel: 'High',
+    aiQuote: 'A resilient core anchors every athletic endeavor and daily movement.',
+  },
+  {
+    title: 'Soleus Muscle Pump for Desk & Couch Time',
+    tip: 'The soleus muscle in the calf has a unique metabolic oxidative capacity. Activating it while seated helps clear blood sugar and prevents venous pooling.',
+    category: 'Vascular Health',
+    actionableStep: 'While seated, keep toes on the ground and raise your heels as high as possible, then drop. Repeat for 30 rhythmic calf raises.',
+    estimatedTime: '2 min',
+    intensityLevel: 'Low',
+    aiQuote: 'Even seated stillness can be transformed into a catalyst for vital blood flow.',
+  },
+];
+
+async function generateDailyMotivation(reqBody: any) {
+  const { date, userRole, recentWorkoutIntensity, forceRefresh } = reqBody || {};
+  const todayStr = date || new Date().toISOString().slice(0, 10);
+
+  if (ai) {
+    try {
+      const prompt = `You are the AI Fitness & Wellness Coach on Vega OS / Amazon Fire TV Living Room Hub.
+Generate an inspiring, short, actionable daily fitness tip for a living room TV user.
+Context:
+- Today's Date: ${todayStr}
+- User Profile: ${userRole || 'Active Living Room Member'}
+- Recent 7-Day Workout Intensity: ${recentWorkoutIntensity || '76% (Aerobic & Threshold)'}
+${forceRefresh ? '- Note: User explicitly requested a fresh, distinct motivation tip. Provide a different dynamic variation.' : ''}
+
+Requirements:
+- Short, punchy, actionable advice tailored for living room activity, posture, movement snacks, hydration, or recovery.
+- Must be realistic to do at home (e.g. bodyweight movements, mobility drills, breathing, hydration).
+- Format strictly as valid JSON with the following keys:
+  - "title": string (3-6 words, catchy and inspiring, e.g. "The 60-Second Posture Reset")
+  - "tip": string (2-3 concise, impactful sentences explaining why this matters today)
+  - "category": string (e.g. "Quick Mobility", "Metabolic Spark", "Core & Spine", "Active Recovery", "Micro-Workouts")
+  - "actionableStep": string (1-2 sentences with a clear, immediate action the user can do right now before streaming or during their break)
+  - "estimatedTime": string (e.g. "2 min", "3 min", "5 min")
+  - "intensityLevel": string ("Low" | "Medium" | "High")
+  - "aiQuote": string (one short motivational quote or mantra)`;
+
+      const response = await withTimeout(
+        ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+          },
+        }),
+        3500
+      );
+
+      const text = response.text;
+      if (text) {
+        const parsed = JSON.parse(text);
+        return {
+          ...parsed,
+          date: todayStr,
+          isAiGenerated: true,
+        };
+      }
+    } catch (err: any) {
+      console.warn('Gemini daily motivation fallback triggered:', err?.message || err);
+    }
+  }
+
+  // Curated deterministic fallback based on day of year/date hash
+  const dayNum = new Date(todayStr).getDate() || 1;
+  const index = (dayNum + (forceRefresh ? Math.floor(Math.random() * 3) + 1 : 0)) % fallbackDailyMotivationTips.length;
+  const selectedFallback = fallbackDailyMotivationTips[index];
+
+  return {
+    ...selectedFallback,
+    date: todayStr,
+    isAiGenerated: false,
+  };
+}
+
+// AI Daily Motivation Fitness Tip Endpoints
+app.get('/api/ai/daily-motivation', async (req, res) => {
+  const result = await generateDailyMotivation(req.query);
+  res.json(result);
+});
+
+app.post('/api/ai/daily-motivation', async (req, res) => {
+  const result = await generateDailyMotivation(req.body);
+  res.json(result);
+});
+
 // Alexa-style Voice Command Intent Parser
 app.post('/api/ai/voice-intent', async (req, res) => {
   const { command } = req.body;

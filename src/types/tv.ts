@@ -15,7 +15,17 @@ export interface MediaItem {
   cast?: string[];
   inWatchlist?: boolean;
   downloaded?: boolean;
+  affinityScore?: number;
+  recommendationReason?: string;
+  algorithmFactors?: {
+    watchHistoryWeight: number;
+    fitnessWeight: number;
+    profileWeight: number;
+    totalScore: number;
+  };
 }
+
+export type AlgorithmPreset = 'balanced' | 'fitness_synergy' | 'watch_history';
 
 export interface PlayerBox {
   id: string;
@@ -132,6 +142,18 @@ export interface LeaderboardUser {
   isCurrentUser?: boolean;
   avatarColor: string;
   badge?: string;
+}
+
+export interface DailyMotivationTip {
+  title: string;
+  tip: string;
+  category: string;
+  actionableStep: string;
+  estimatedTime: string;
+  intensityLevel: 'Low' | 'Medium' | 'High';
+  aiQuote: string;
+  date: string;
+  isAiGenerated: boolean;
 }
 
 

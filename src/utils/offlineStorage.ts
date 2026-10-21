@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   ACTIVE_PROFILE: 'vega_tv_active_profile',
   FITNESS_HISTORY: 'vega_tv_fitness_history',
   INTENSITY_HISTORY: 'vega_tv_intensity_history',
+  WATCHED_HISTORY: 'vega_tv_watched_history',
   NOTIFICATION_SCHEDULE: 'vega_tv_notification_schedule',
   DIAGNOSTICS: 'vega_tv_diagnostics',
   SYNC_QUEUE: 'vega_tv_sync_queue',
@@ -152,6 +153,50 @@ export const sampleMediaCatalog: MediaItem[] = [
     inWatchlist: false,
     downloaded: true,
   },
+  {
+    id: 'sports-3',
+    title: 'Premier League: Arsenal vs Chelsea',
+    category: 'sports',
+    subtitle: 'London Derby · Emirates Stadium',
+    duration: 'Live · 84:10',
+    rating: 'LIVE 4K',
+    resolution: '4K HDR',
+    matchScore: '3 - 2',
+    synopsis: 'High-octane London derby with live pressing intensity heatmaps, sprint speed trackers, and defensive shape analysis powered by CV.',
+    backdropTheme: 'from-red-950 via-neutral-900 to-black',
+    tags: ['Live Sports', 'Tactical CV', 'Premier League', 'High Tempo'],
+    inWatchlist: false,
+    downloaded: true,
+  },
+  {
+    id: 'fitness-3',
+    title: 'Metabolic Athletic Conditioning',
+    category: 'fitness',
+    subtitle: 'Speed, Agility & Core · Coach Marcus',
+    duration: '25 min',
+    rating: 'Advanced',
+    resolution: '4K UHD',
+    synopsis: 'High-intensity cross-training designed for athletic speed and functional power. Real-time joint velocity and explosive rep counter.',
+    backdropTheme: 'from-rose-950 via-zinc-900 to-black',
+    tags: ['AI Fitness', 'Athletic', 'HIIT', 'Anaerobic'],
+    inWatchlist: false,
+    downloaded: false,
+  },
+  {
+    id: 'movie-3',
+    title: 'Echoes of the Nebula: Starfall',
+    category: 'movie',
+    subtitle: 'Deep Space Drama · Dolby Vision',
+    duration: '2h 10m',
+    rating: 'PG-13',
+    resolution: '4K HDR',
+    synopsis: 'An interstellar search for lost celestial frequencies. Sweeping orchestral score mixed in spatial Dolby Atmos with 4K color grading.',
+    backdropTheme: 'from-indigo-950 via-zinc-900 to-black',
+    tags: ['Sci-Fi', 'Space', 'Dolby Atmos', '4K Master'],
+    cast: ['Devon Cole', 'Astrid Lind'],
+    inWatchlist: false,
+    downloaded: true,
+  },
 ];
 
 // Local diagnostic logger
@@ -262,6 +307,24 @@ export const tvStorage = {
     try {
       localStorage.setItem(STORAGE_KEYS.INTENSITY_HISTORY, JSON.stringify(history));
       TVLogger.log('INFO', 'SYNC', 'Updated 7-day workout intensity history');
+    } catch {}
+  },
+
+  getWatchedHistory(): string[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.WATCHED_HISTORY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    // Sensible defaults representing past viewed content (matches UCL Final, HIIT Session & Sci-Fi)
+    return ['sports-1', 'fitness-1', 'movie-1'];
+  },
+
+  recordWatched(id: string) {
+    try {
+      const history = this.getWatchedHistory();
+      const updated = [id, ...history.filter((x) => x !== id)].slice(0, 20);
+      localStorage.setItem(STORAGE_KEYS.WATCHED_HISTORY, JSON.stringify(updated));
+      TVLogger.log('INFO', 'SYNC', `Logged viewing interaction for item ${id}`);
     } catch {}
   },
 
