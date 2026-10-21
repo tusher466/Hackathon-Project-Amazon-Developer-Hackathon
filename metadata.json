@@ -1,0 +1,6 @@
+{
+  "name": "Vega TV - AI Living Room & Sports Hub",
+  "description": "Production-grade 10-foot Fire OS & Vega OS living room experience with AI-enhanced sports tracking, computer vision fitness, Smart X-Ray, D-Pad remote simulation, voice navigation, and offline sync.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
